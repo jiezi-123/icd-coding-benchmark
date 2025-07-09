@@ -12,13 +12,16 @@ logger = get_logger(__name__)
 
 
 class TopKCodes:
-    def __init__(self, k, labels_save_path, labels_freq_save_path=None):
+    def __init__(
+        self, k, labels_save_path, labels_freq_save_path=None, mode="top"
+    ):
         logger.debug(
-            f"Finding top-k codes with the following args: k = {k}, "
+            f"Finding {mode}-k codes with the following args: k = {k}, "
             f"labels_save_path = {labels_save_path}, "
             f"labels_freq_save_path = {labels_freq_save_path}"
         )
         self.k = k
+        self.mode = mode
         self.top_k_codes = []
         self.labels_save_path = labels_save_path
         self.labels_freq_save_path = labels_freq_save_path
@@ -57,11 +60,20 @@ class TopKCodes:
         if self.k == 0:
             self.top_k_codes = [code for code, _ in counts.items()]
         else:
-            self.top_k_codes = [code for code, _ in counts.most_common(self.k)]
+            if self.mode == "rare":
+                sorted_counts = sorted(counts.items(), key=lambda x: x[1])
+                self.top_k_codes = [c for c, _ in sorted_counts[: self.k]]
+            else:
+                self.top_k_codes = [
+                    code for code, _ in counts.most_common(self.k)
+                ]
 
-        logger.debug("top-k codes: {}".format(self.top_k_codes))
+        logger.debug("selected codes: {}".format(self.top_k_codes))
 
         if self.k != 0:
-            counts = counts.most_common(self.k)
+            if self.mode == "rare":
+                counts = sorted(counts.items(), key=lambda x: x[1])[: self.k]
+            else:
+                counts = counts.most_common(self.k)
         counts = dict(counts)
         return counts
