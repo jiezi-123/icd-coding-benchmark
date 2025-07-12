@@ -7,9 +7,9 @@ import torch  # PyTorch 深度学习框架
 from torchsummaryX import summary  # 打印模型结构
 
 from anemic.utils.configuration import Config  # 读取 YAML 配置
-from anemic.utils.import_related_ops import (
+from anemic.utils.import_related_ops import (  # 设置 pandas 显示
     pandas_related_ops,
-)  # 设置 pandas 显示
+)
 from anemic.utils.mapper import ConfigMapper  # 名称到对象的映射工具
 from anemic.utils.misc import seed  # 随机种子设置
 
