@@ -38,7 +38,7 @@ class CamlOfficialSplit:
 
 @ConfigMapper.map("dataset_splitters", "caml_official_split_limited")
 class CamlOfficialSplitLimited(CamlOfficialSplit):
-    """Same as :class:`CamlOfficialSplit` but allows limiting validation size."""
+    """Like :class:`CamlOfficialSplit` but optionally limit validation size."""
 
     def __init__(self, config):
         super().__init__(config)
