@@ -29,6 +29,8 @@ We currently provide (items in parentheses are under development):
 - ICD coding models: CNN, CAML, MultiResCNN[^3], DCAN[^4], TransICD[^5], Fusion[^6], (LAAT)
 - Interactive demo
 
+The **rare-50** dataset focuses on infrequent ICD codes. We first count label frequencies using the MIMIC-III full training split and keep codes that appear no more than five times but at least once. For each of these codes we compute the ratio between its occurrences in the test and training splits and rank them in descending order. The top 50 codes by this ratio form the rare-50 label set. Only discharge summaries containing at least one of these codes are kept, resulting in 516 notes split into 249 for training, 125 for validation, and 142 for testing.
+
 
 ## Preparation
 Please put the MIMIC-III `csv.gz` files (v1.4) under `datasets/mimic3/csv/`. You can also create symbolic links pointing to the files.
