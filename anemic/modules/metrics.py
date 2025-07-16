@@ -1,5 +1,7 @@
 """Metrics."""
+
 import multiprocessing
+import os
 
 import numpy as np
 from sklearn.metrics import (
@@ -11,6 +13,7 @@ from sklearn.metrics import (
 )
 
 from anemic.utils.configuration import Config
+from anemic.utils.file_loaders import load_json
 from anemic.utils.mapper import ConfigMapper
 from anemic.utils.text_loggers import get_logger
 
@@ -25,7 +28,10 @@ def to_np_array(array):
 
 
 def _auc_job(x):
-    return roc_auc_score(x[0], x[1])
+    try:
+        return roc_auc_score(x[0], x[1])
+    except ValueError:
+        return float("nan")
 
 
 class Metric:
@@ -96,13 +102,17 @@ class MacroAUC(Metric):
         y_true = y_true[:, pos_flag]
         p_pred = p_pred[:, pos_flag]
         if self.num_process <= 1:
-            return roc_auc_score(y_true, p_pred, average="macro")
+            try:
+                return roc_auc_score(y_true, p_pred, average="macro")
+            except ValueError:
+                return float("nan")
         else:
             pool = multiprocessing.Pool(self.num_process)
             result = pool.map_async(_auc_job, list(zip(y_true.T, p_pred.T)))
             pool.close()
             pool.join()
-            return np.mean(result.get())
+            scores = [v for v in result.get() if not np.isnan(v)]
+            return np.mean(scores) if scores else float("nan")
 
 
 ##########################################################################
@@ -135,7 +145,10 @@ class MicroF1(Metric):
 class MicroAUC(Metric):
     def forward(self, y_true, y_pred=None, p_pred=None):
         assert p_pred is not None
-        return roc_auc_score(y_true, p_pred, average="micro")
+        try:
+            return roc_auc_score(y_true, p_pred, average="micro")
+        except ValueError:
+            return float("nan")
 
 
 ##########################################################################

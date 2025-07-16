@@ -25,9 +25,11 @@ This code repository aims to provide a standardized benchmark of automatic diagn
 The benchmark encompasses all the procedures of ICD coding: dataset pre-processing, model training/evaluation, and interactive web demo.
 
 We currently provide (items in parentheses are under development):
-- Four preset of preprocessed datasets: MIMIC-III full, top-50, full (old), top-50 (old), where we referred to (old) as the version of CAML[^2].
+- Five preset preprocessed datasets: MIMIC-III full, top-50, rare-50, full (old), top-50 (old), where we referred to (old) as the version of CAML[^2].
 - ICD coding models: CNN, CAML, MultiResCNN[^3], DCAN[^4], TransICD[^5], Fusion[^6], (LAAT)
 - Interactive demo
+
+The **rare-50** dataset focuses on infrequent ICD codes. We first count label frequencies using the MIMIC-III full training split and keep codes that appear no more than five times but at least once. For each of these codes we compute the ratio between its occurrences in the test and training splits and rank them in descending order. The top 50 codes by this ratio form the rare-50 label set. Only discharge summaries containing at least one of these codes are kept, resulting in 516 notes split into 249 for training, 125 for validation, and 142 for testing.
 
 
 ## Preparation
@@ -35,17 +37,21 @@ Please put the MIMIC-III `csv.gz` files (v1.4) under `datasets/mimic3/csv/`. You
 
 
 ## Pre-processing
-Please run the following command to generate the MIMIC-III top-50 dataset or generate other versions using the config files in `configs/preprocessing`.
+Please run the following command to generate the MIMIC-III top-50 dataset, or create the rare-50 version and others using the config files in `configs/preprocessing`.
 ```
 $ python run_preprocessing.py --config_path configs/preprocessing/default/mimic3_50.yml
+# Rare-50 dataset
+$ python run_preprocessing.py --config_path configs/preprocessing/default/mimic3_rare50.yml
 ```
 
 
 ## Training / Testing
-Please run the following command to train, or resume training of, the CAML model on the MIMIC-III top-50 dataset. You can evaluate the model with `--test` options and use other config files under `configs`.
+Please run the following command to train, or resume training of, the CAML model on the MIMIC-III top-50 dataset. The rare-50 configuration works similarly. Evaluate using `--test`.
 ```
 $ python run.py --config_path configs/caml/caml_mimic3_50.yml         # Train
 $ python run.py --config_path configs/caml/caml_mimic3_50.yml --test  # Test
+# Rare-50
+$ python run.py --config_path configs/caml/caml_mimic3_rare50.yml
 ```
 Training is logged through TensorBoard graph (located in the output dir under `results/`).
 Also, logging through text files is performed on pre-processing, training, and evaluation. Log files will be located under `logs/`.

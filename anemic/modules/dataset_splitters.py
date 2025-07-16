@@ -24,9 +24,21 @@ class CamlOfficialSplit:
         self.test_split = load_json(
             os.path.join(config.hadm_dir, config.test_hadm_ids_name)
         )
+        self.val_size = getattr(config, "val_size", None)
 
     def __call__(self, df, hadm_id_col_name):
         train_df = df[df[hadm_id_col_name].isin(self.train_split)]
         val_df = df[df[hadm_id_col_name].isin(self.val_split)]
         test_df = df[df[hadm_id_col_name].isin(self.test_split)]
+        if self.val_size is not None:
+            if self.val_size < len(val_df):
+                val_df = val_df.sample(n=self.val_size, random_state=0)
         return (train_df, val_df, test_df)
+
+
+@ConfigMapper.map("dataset_splitters", "caml_official_split_limited")
+class CamlOfficialSplitLimited(CamlOfficialSplit):
+    """Like :class:`CamlOfficialSplit` but optionally limit validation size."""
+
+    def __init__(self, config):
+        super().__init__(config)

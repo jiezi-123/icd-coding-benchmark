@@ -46,16 +46,23 @@ class MimiciiiPreprocessingPipeline:
         )
         self.code_preprocessor = CodeProcessor(self.code_config)
 
+        rare_params = None
+        if getattr(self.code_config, "mode", "top") == "rare":
+            rare_params = config.dataset_splitting_method.params
+            rare_params.set_value("hadm_id_col", self.cols.hadm_id)
+
         self.top_k_codes = TopKCodes(
             k=self.code_config.top_k,
             labels_save_path=os.path.join(
                 self.SAVE_DIR, config.paths.label_json_name
             ),
-            labels_freq_save_path=os.path.join(
-                self.SAVE_DIR, config.paths.label_freq_json_name
-            )
-            if config.paths.label_freq_json_name is not None
-            else None,
+            labels_freq_save_path=(
+                os.path.join(self.SAVE_DIR, config.paths.label_freq_json_name)
+                if config.paths.label_freq_json_name is not None
+                else None
+            ),
+            mode=getattr(self.code_config, "mode", "top"),
+            rare_split_params=rare_params,
         )
         self.split_data = ConfigMapper.get_object(
             "dataset_splitters", config.dataset_splitting_method.name
